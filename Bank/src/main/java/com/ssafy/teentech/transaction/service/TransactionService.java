@@ -38,26 +38,49 @@ public class TransactionService {
         String withdrawAccountNumber = transactionRequestDto.getWithdrawAccountNumber();
         String depositAccountNumber = transactionRequestDto.getDepositAccountNumber();
 
-        Account withdrawAccount = accountRepository.findByAccountNumberForUpdate(
-                withdrawAccountNumber)
-            .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+        if (withdrawAccountNumber.compareTo(depositAccountNumber) == -1) {
+            Account withdrawAccount = accountRepository.findByAccountNumberForUpdate(
+                            withdrawAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-        withdrawAccount.checkOwner(transactionRequestDto.getWithdrawAccountId());
-        withdrawAccount.checkPassword(transactionRequestDto.getWithdrawAccountPassword());
+            withdrawAccount.checkOwner(transactionRequestDto.getWithdrawAccountId());
+            withdrawAccount.checkPassword(transactionRequestDto.getWithdrawAccountPassword());
 
-        Account depositAccount = accountRepository.findByAccountNumberForUpdate(
-                depositAccountNumber)
-            .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+            Account depositAccount = accountRepository.findByAccountNumberForUpdate(
+                            depositAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-        withdrawAccount.withdraw(transactionRequestDto.getAmount());
-        depositAccount.deposit(transactionRequestDto.getAmount());
+            withdrawAccount.withdraw(transactionRequestDto.getAmount());
+            depositAccount.deposit(transactionRequestDto.getAmount());
 
-        Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccount)
-            .balanceAfterWithdraw(withdrawAccount.getBalance()).depositAccount(depositAccount)
-            .balanceAfterDeposit(depositAccount.getBalance())
-            .transferAmount(transactionRequestDto.getAmount())
-            .content(transactionRequestDto.getContent()).build();
-        transactionRepository.save(transaction);
+            Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccount)
+                    .balanceAfterWithdraw(withdrawAccount.getBalance()).depositAccount(depositAccount)
+                    .balanceAfterDeposit(depositAccount.getBalance())
+                    .transferAmount(transactionRequestDto.getAmount())
+                    .content(transactionRequestDto.getContent()).build();
+            transactionRepository.save(transaction);
+        } else {
+            Account depositAccount = accountRepository.findByAccountNumberForUpdate(
+                            depositAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+            Account withdrawAccount = accountRepository.findByAccountNumberForUpdate(
+                            withdrawAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+            withdrawAccount.checkOwner(transactionRequestDto.getWithdrawAccountId());
+            withdrawAccount.checkPassword(transactionRequestDto.getWithdrawAccountPassword());
+
+            withdrawAccount.withdraw(transactionRequestDto.getAmount());
+            depositAccount.deposit(transactionRequestDto.getAmount());
+
+            Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccount)
+                    .balanceAfterWithdraw(withdrawAccount.getBalance()).depositAccount(depositAccount)
+                    .balanceAfterDeposit(depositAccount.getBalance())
+                    .transferAmount(transactionRequestDto.getAmount())
+                    .content(transactionRequestDto.getContent()).build();
+            transactionRepository.save(transaction);
+        }
     }
 
     public void executeAutoTransaction(AutoTransactionRequestDto autoTransactionRequestDto) {
@@ -68,31 +91,52 @@ public class TransactionService {
         String withdrawAccountNumber = autoTransactionRequestDto.getWithdrawAccountNumber();
         String depositAccountNumber = autoTransactionRequestDto.getDepositAccountNumber();
 
-        Account withdrawAccount = accountRepository.findByAccountNumberForUpdate(
-                withdrawAccountNumber)
-            .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+        if (withdrawAccountNumber.compareTo(depositAccountNumber) == -1) {
+            Account withdrawAccount = accountRepository.findByAccountNumberForUpdate(
+                            withdrawAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-        withdrawAccount.checkOwner(autoTransactionRequestDto.getWithdrawAccountId());
+            withdrawAccount.checkOwner(autoTransactionRequestDto.getWithdrawAccountId());
 
-        Account depositAccount = accountRepository.findByAccountNumberForUpdate(
-                depositAccountNumber)
-            .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+            Account depositAccount = accountRepository.findByAccountNumberForUpdate(
+                            depositAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-        withdrawAccount.withdraw(autoTransactionRequestDto.getAmount());
-        depositAccount.deposit(autoTransactionRequestDto.getAmount());
+            withdrawAccount.withdraw(autoTransactionRequestDto.getAmount());
+            depositAccount.deposit(autoTransactionRequestDto.getAmount());
 
-        Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccount)
-            .balanceAfterWithdraw(withdrawAccount.getBalance()).depositAccount(depositAccount)
-            .balanceAfterDeposit(depositAccount.getBalance())
-            .transferAmount(autoTransactionRequestDto.getAmount())
-            .content(autoTransactionRequestDto.getContent()).build();
-        transactionRepository.save(transaction);
+            Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccount)
+                    .balanceAfterWithdraw(withdrawAccount.getBalance()).depositAccount(depositAccount)
+                    .balanceAfterDeposit(depositAccount.getBalance())
+                    .transferAmount(autoTransactionRequestDto.getAmount())
+                    .content(autoTransactionRequestDto.getContent()).build();
+            transactionRepository.save(transaction);
+        } else {
+            Account depositAccount = accountRepository.findByAccountNumberForUpdate(
+                            depositAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+            Account withdrawAccount = accountRepository.findByAccountNumberForUpdate(
+                            withdrawAccountNumber)
+                    .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+            withdrawAccount.checkOwner(autoTransactionRequestDto.getWithdrawAccountId());
+
+            withdrawAccount.withdraw(autoTransactionRequestDto.getAmount());
+            depositAccount.deposit(autoTransactionRequestDto.getAmount());
+
+            Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccount)
+                    .balanceAfterWithdraw(withdrawAccount.getBalance()).depositAccount(depositAccount)
+                    .balanceAfterDeposit(depositAccount.getBalance())
+                    .transferAmount(autoTransactionRequestDto.getAmount())
+                    .content(autoTransactionRequestDto.getContent()).build();
+            transactionRepository.save(transaction);
+        }
     }
 
     public TransactionListResponseDto getTransactions(
         TransactionListRequestDto transactionListRequestDto) {
-        Account account = accountRepository.findByAccountNumberForUpdate(
-                transactionListRequestDto.getAccountNumber())
+        Account account = accountRepository.findByAccountNumber(transactionListRequestDto.getAccountNumber())
             .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
         account.checkOwner(transactionListRequestDto.getUserId());
 
